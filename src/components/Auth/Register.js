@@ -20,6 +20,58 @@ function Register() {
     passwordConfirmation: ""
   });
 
+  const [errors, setErrors] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  function isFormValid() {
+    let currentErrors = [];
+    let error;
+
+    if (!isFormEmpty(inputValues)) {
+      error = { message: "Fill in all fields" };
+      // TODO: recheck behaviour of currentErrors.push in setErrors and try if concat is better
+      currentErrors.push(error);
+      setErrors(currentErrors);
+      return false;
+    } else if (!isPasswordValid(inputValues)) {
+      error = { message: "Password is invalid" };
+      currentErrors.push(error);
+      setErrors(currentErrors);
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  function isPasswordValid({ password, passwordConfirmation }) {
+    if (password.length < 6 || passwordConfirmation.length < 6) {
+      return false;
+    } else if (password !== passwordConfirmation) {
+      return false;
+    } else {
+      return true;
+    }
+  }
+
+  function isFormEmpty({ username, email, password, passwordConfirmation }) {
+    return (
+      !(username.length === 0) ||
+      !(email.length === 0) ||
+      !(password.length === 0) ||
+      !(passwordConfirmation.length === 0)
+    );
+  }
+
+  function handleInputError(inputName) {
+    return errors.some(error => error.message.toLowerCase().includes(inputName))
+      ? "error"
+      : "";
+  }
+
+  function displayErrors() {
+    return errors.map((error, i) => <p key={i}>{error.message}</p>);
+  }
+
   function handleChange(event) {
     //event.persist();
     setInputValues({ ...inputValues, [event.target.name]: event.target.value });
@@ -27,10 +79,22 @@ function Register() {
 
   function handleSubmit(event) {
     event.preventDefault();
-    firebase
-      .auth()
-      .createUserWithEmailAndPassword(inputValues.email, inputValues.password)
-      .then(user => console.log(user));
+    if (isFormValid()) {
+      setIsLoading(true);
+      setErrors([]);
+      firebase
+        .auth()
+        .createUserWithEmailAndPassword(inputValues.email, inputValues.password)
+        .then(user => {
+          console.log(user);
+          setIsLoading(false);
+        })
+        .catch(err => {
+          setIsLoading(false);
+          setErrors([err]);
+          console.log(err);
+        });
+    }
   }
 
   return (
@@ -61,6 +125,7 @@ function Register() {
               type="email"
               value={inputValues.email}
               onChange={handleChange}
+              className={handleInputError("email")}
             />
             <Form.Input
               fluid
@@ -71,6 +136,7 @@ function Register() {
               type="password"
               value={inputValues.password}
               onChange={handleChange}
+              className={handleInputError("password")}
             />
             <Form.Input
               fluid
@@ -81,13 +147,26 @@ function Register() {
               type="password"
               value={inputValues.passwordConfirmation}
               onChange={handleChange}
+              className={handleInputError("password")}
             />
 
-            <Button color="orange" fluid size="large">
+            <Button
+              disabled={isLoading}
+              className={isLoading ? "loading" : ""}
+              color="orange"
+              fluid
+              size="large"
+            >
               Submit
             </Button>
           </Segment>
         </Form>
+        {errors.length > 0 && (
+          <Message error>
+            <h3>Error</h3>
+            {displayErrors()}
+          </Message>
+        )}
         <Message>
           Already a user?<Link to="/login">Login</Link>
         </Message>
