@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import {
   BrowserRouter as Router,
@@ -14,6 +14,7 @@ import { composeWithDevTools } from "redux-devtools-extension";
 import App from "./components/App";
 import Login from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
+import Spinner from "./components/Spinner";
 import rootReducer from "./reducers";
 import { setUser } from "./actions";
 
@@ -23,32 +24,63 @@ import "semantic-ui-css/semantic.min.css";
 
 const store = createStore(rootReducer, composeWithDevTools());
 
-function Root(props) {
-  useEffect(() => {
+// function Root(props) {
+//   useEffect(() => {
+//     firebase.auth().onAuthStateChanged(user => {
+//       if (user) {
+//         console.log(user);
+//         props.setUser(user);
+//         props.history.push("/");
+//       }
+//     });
+//   });
+
+//   return (
+//     <Switch>
+//       <Route exact path="/" component={App} />
+//       <Route path="/login" component={Login} />
+//       <Route path="/register" component={Register} />
+//     </Switch>
+//   );
+// }
+
+class Root extends Component {
+  componentDidMount() {
     firebase.auth().onAuthStateChanged(user => {
       if (user) {
         console.log(user);
-        props.setUser(user);
-        props.history.push("/");
+        this.props.setUser(user);
+        this.props.history.push("/");
       }
     });
-  });
+  }
 
-  return (
-    <Switch>
-      <Route exact path="/" component={App} />
-      <Route path="/login" component={Login} />
-      <Route path="/register" component={Register} />
-    </Switch>
-  );
+  render() {
+    return this.props.isLoading ? (
+      <Spinner />
+    ) : (
+      <Switch>
+        <Route exact path="/" component={App} />
+        <Route path="/login" component={Login} />
+        <Route path="/register" component={Register} />
+      </Switch>
+    );
+  }
 }
+
+const mapStateToProps = state => ({
+  isLoading: state.user.isLoading
+});
 
 const RootWithAuth = withRouter(
   connect(
-    null,
+    mapStateToProps,
     { setUser }
   )(Root)
 );
+
+//const RootWithAuth = withRouter(Root);
+
 ReactDOM.render(
   <Provider store={store}>
     <Router>
