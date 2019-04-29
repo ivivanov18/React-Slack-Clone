@@ -8,6 +8,7 @@ import {
   Message,
   Icon
 } from "semantic-ui-react";
+import md5 from "md5";
 import { Link } from "react-router-dom";
 
 import firebase from "../../firebase";
@@ -19,6 +20,8 @@ function Register() {
     password: "",
     passwordConfirmation: ""
   });
+  // TODO: improve this declaration --> medium article on errors to avoid when writing hooks
+  const [usersRef] = useState(firebase.database().ref("users"));
 
   const [errors, setErrors] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -85,16 +88,38 @@ function Register() {
       firebase
         .auth()
         .createUserWithEmailAndPassword(inputValues.email, inputValues.password)
-        .then(user => {
-          console.log(user);
-          setIsLoading(false);
+        .then(createdUser => {
+          console.log(createdUser);
+          createdUser.user
+            .updateProfile({
+              displayName: inputValues.username,
+              photoURL: `http://gravatar.com/avatar/${md5(
+                createdUser.user.email
+              )}?d=identicon`
+            })
+            .then(() => {
+              saveUser(createdUser).then(() => {
+                console.log("user saved");
+                setIsLoading(false);
+              });
+            })
+            .catch(err => {
+              setIsLoading(false);
+              setErrors([err]);
+            });
         })
         .catch(err => {
           setIsLoading(false);
           setErrors([err]);
-          console.log(err);
         });
     }
+  }
+
+  function saveUser(createdUser) {
+    return usersRef.child(createdUser.user.uid).set({
+      name: createdUser.user.displayName,
+      avatar: createdUser.user.photoURL
+    });
   }
 
   return (
