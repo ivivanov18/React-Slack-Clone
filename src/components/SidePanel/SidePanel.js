@@ -2,7 +2,7 @@ import React from "react";
 import { Menu } from "semantic-ui-react";
 import UserPanel from "./UserPanel";
 
-function SidePanel() {
+function SidePanel({ currentUser }) {
   return (
     <Menu
       size="large"
@@ -11,7 +11,7 @@ function SidePanel() {
       vertical
       style={{ background: "#4c4c4c", fontSize: "1.2rem" }}
     >
-      <UserPanel />
+      <UserPanel currentUser={currentUser} />
     </Menu>
   );
 }

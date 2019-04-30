@@ -2,7 +2,7 @@ import React from "react";
 import firebase from "../../firebase";
 import { Grid, Header, Icon, Dropdown } from "semantic-ui-react";
 
-function UserPanel() {
+function UserPanel({ currentUser }) {
   const handleSignout = () => {
     firebase
       .auth()
@@ -15,7 +15,7 @@ function UserPanel() {
       key: "user",
       text: (
         <span>
-          Signed in as <strong>User</strong>
+          Signed in as <strong>{currentUser.displayName}</strong>
         </span>
       ),
       disabled: true
@@ -42,11 +42,13 @@ function UserPanel() {
         </Grid.Row>
         {/* User Dropdown */}
         <Header style={{ padding: "0.25em" }} as="h4" inverted>
-          <Dropdown trigger={<span>User</span>} options={dropDownOptions()} />
+          <Dropdown
+            trigger={<span>{currentUser.displayName}</span>}
+            options={dropDownOptions()}
+          />
         </Header>
       </Grid.Column>
     </Grid>
   );
 }
-
 export default UserPanel;
