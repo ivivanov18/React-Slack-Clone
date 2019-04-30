@@ -1,10 +1,18 @@
 import React from "react";
+import { Menu } from "semantic-ui-react";
+import UserPanel from "./UserPanel";
 
 function SidePanel() {
   return (
-    <div>
-      <h1>Side Panel</h1>
-    </div>
+    <Menu
+      size="large"
+      inverted
+      fixed="left"
+      vertical
+      style={{ background: "#4c4c4c", fontSize: "1.2rem" }}
+    >
+      <UserPanel />
+    </Menu>
   );
 }
 
