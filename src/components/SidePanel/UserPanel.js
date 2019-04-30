@@ -1,6 +1,6 @@
 import React from "react";
 import firebase from "../../firebase";
-import { Grid, Header, Icon, Dropdown } from "semantic-ui-react";
+import { Grid, Header, Icon, Dropdown, Image } from "semantic-ui-react";
 
 function UserPanel({ currentUser }) {
   const handleSignout = () => {
@@ -43,7 +43,12 @@ function UserPanel({ currentUser }) {
         {/* User Dropdown */}
         <Header style={{ padding: "0.25em" }} as="h4" inverted>
           <Dropdown
-            trigger={<span>{currentUser.displayName}</span>}
+            trigger={
+              <span>
+                <Image src={currentUser.photoURL} spaced="right" avatar />
+                {currentUser.displayName}
+              </span>
+            }
             options={dropDownOptions()}
           />
         </Header>
