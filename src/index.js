@@ -16,7 +16,7 @@ import Login from "./components/Auth/Login";
 import Register from "./components/Auth/Register";
 import Spinner from "./components/Spinner";
 import rootReducer from "./reducers";
-import { setUser } from "./actions";
+import { setUser, clearUser } from "./actions";
 
 import * as serviceWorker from "./serviceWorker";
 
@@ -51,6 +51,9 @@ class Root extends Component {
         console.log(user);
         this.props.setUser(user);
         this.props.history.push("/");
+      } else {
+        this.props.history.push("/login");
+        this.props.clearUser();
       }
     });
   }
@@ -75,7 +78,7 @@ const mapStateToProps = state => ({
 const RootWithAuth = withRouter(
   connect(
     mapStateToProps,
-    { setUser }
+    { setUser, clearUser }
   )(Root)
 );
 
