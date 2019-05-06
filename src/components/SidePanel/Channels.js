@@ -17,10 +17,12 @@ function Channels({ currentUser, setCurrentChannel }) {
   useEffect(() => {
     let loadChannels = [];
     channelsRef.current.on("child_added", snap => {
+      console.log("added");
       loadChannels.push(snap.val());
       setChannels(loadChannels);
       // TODO: set first channel as active channel
       setActiveChannel(snap.val().id);
+      return () => channelsRef.current.off();
     });
   }, []);
 
