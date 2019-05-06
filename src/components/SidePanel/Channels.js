@@ -10,15 +10,17 @@ function Channels({ currentUser, setCurrentChannel }) {
   const [modal, setModal] = useState(false);
   const [channelName, setChannelName] = useState("");
   const [channelDetails, setChannelDetails] = useState("");
-  const channelsRef = useRef(firebase.database().ref("channels"));
+  const [activeChannel, setActiveChannel] = useState("");
 
-  // TODO: add useEffect to read channels for first render
+  const channelsRef = useRef(firebase.database().ref("channels"));
 
   useEffect(() => {
     let loadChannels = [];
     channelsRef.current.on("child_added", snap => {
       loadChannels.push(snap.val());
       setChannels(loadChannels);
+      // TODO: set first channel as active channel
+      setActiveChannel(snap.val().id);
     });
   }, []);
 
@@ -70,6 +72,7 @@ function Channels({ currentUser, setCurrentChannel }) {
 
   const changeChannel = channel => {
     setCurrentChannel(channel);
+    setActiveChannel(channel.id);
   };
 
   const isFormValid = ({ channelName, channelDetails }) =>
@@ -83,8 +86,9 @@ function Channels({ currentUser, setCurrentChannel }) {
         onClick={() => changeChannel(channel)}
         name={channel.name}
         style={{ opacity: 0.7 }}
+        active={channel.id === activeChannel}
       >
-        @ {channel.name}
+        # {channel.name}
       </Menu.Item>
     ));
 
