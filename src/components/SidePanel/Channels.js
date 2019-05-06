@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Menu, Icon, Modal, Form, Input, Button } from "semantic-ui-react";
 import firebase from "../../firebase";
 
@@ -8,6 +8,16 @@ function Channels({ currentUser }) {
   const [channelName, setChannelName] = useState("");
   const [channelDetails, setChannelDetails] = useState("");
   const channelsRef = useRef(firebase.database().ref("channels"));
+
+  // TODO: add useEffect to read channels for first render
+
+  useEffect(() => {
+    let loadChannels = [];
+    channelsRef.current.on("child_added", snap => {
+      loadChannels.push(snap.val());
+      setChannels(loadChannels);
+    });
+  }, []);
 
   const closeModal = () => {
     setModal(false);
@@ -33,7 +43,6 @@ function Channels({ currentUser }) {
   };
 
   const addChannel = () => {
-    console.log("in addChannel", channelsRef);
     const key = channelsRef.current.push().key;
     const newChannel = {
       id: key,
@@ -52,13 +61,25 @@ function Channels({ currentUser }) {
         setChannelName("");
         setChannelDetails("");
         closeModal();
-        console.log("added channel");
       })
       .catch(err => console.error(err));
   };
 
   const isFormValid = ({ channelName, channelDetails }) =>
     channelName && channelDetails;
+
+  const displayChannels = channelsP =>
+    channelsP.length > 0 &&
+    channelsP.map(channel => (
+      <Menu.Item
+        key={channel.id}
+        onClick={() => console.log(channel)}
+        name={channel.name}
+        style={{ opacity: 0.7 }}
+      >
+        @ {channel.name}
+      </Menu.Item>
+    ));
 
   return (
     <React.Fragment>
@@ -69,6 +90,7 @@ function Channels({ currentUser }) {
           </span>
           ({channels.length}) <Icon name="add" onClick={openModal} />
         </Menu.Item>
+        {displayChannels(channels)}
       </Menu.Menu>
       <Modal basic open={modal} onClose={closeModal}>
         <Modal.Header>Add a channel</Modal.Header>
