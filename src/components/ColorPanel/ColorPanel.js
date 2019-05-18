@@ -9,7 +9,7 @@ function ColorPanel() {
       inverted
       vertical
       visible
-      width="very thing"
+      width="very thin"
     >
       <Divider />
       <Button icon="add" size="small" color="blue" />
