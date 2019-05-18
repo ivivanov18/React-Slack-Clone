@@ -1,7 +1,47 @@
-import React from "react";
+import React, { useState } from "react";
 import { Segment, Button, Input } from "semantic-ui-react";
 
-function MessageForm() {
+import firebase from "../../firebase";
+
+function MessageForm({ messagesRef, currentChannel, currentUser }) {
+  const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errors, setErrors] = useState([]);
+
+  const handleChange = e => {
+    setMessage(e.target.value);
+  };
+
+  const createMessage = () => ({
+    timestamp: firebase.database.ServerValue.TIMESTAMP,
+    user: {
+      id: currentUser.uid,
+      name: currentUser.displayName,
+      avatar: currentUser.photoURL
+    },
+    content: message
+  });
+
+  const sendMessage = () => {
+    if (message) {
+      setIsLoading(true);
+      messagesRef
+        .child(currentChannel.id)
+        .push()
+        .set(createMessage())
+        .then(() => {
+          setIsLoading(false);
+          setMessage("");
+          setErrors([]);
+        })
+        .catch(err => {
+          setIsLoading(false);
+          setErrors([...errors, err]);
+        });
+    } else {
+      setErrors([...errors, { message: "Add a message" }]);
+    }
+  };
   return (
     <Segment className="message__form">
       <Input
@@ -11,6 +51,10 @@ function MessageForm() {
         label={<Button icon={"add"} />}
         labelPosition="left"
         placeholder="Write your message"
+        onChange={handleChange}
+        className={
+          errors.some(error => error.message.includes("message")) ? "error" : ""
+        }
       />
       <Button.Group icon widths="2">
         <Button
@@ -18,6 +62,7 @@ function MessageForm() {
           content="Add Reply"
           labelPosition="left"
           icon="edit"
+          onClick={sendMessage}
         />
         <Button
           color="teal"
