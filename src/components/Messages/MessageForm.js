@@ -55,6 +55,7 @@ function MessageForm({ messagesRef, currentChannel, currentUser }) {
         className={
           errors.some(error => error.message.includes("message")) ? "error" : ""
         }
+        value={message}
       />
       <Button.Group icon widths="2">
         <Button
@@ -63,6 +64,7 @@ function MessageForm({ messagesRef, currentChannel, currentUser }) {
           labelPosition="left"
           icon="edit"
           onClick={sendMessage}
+          disabled={isLoading}
         />
         <Button
           color="teal"
