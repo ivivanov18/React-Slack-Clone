@@ -1,15 +1,46 @@
-import React from "react";
+import React, { useState } from "react";
 import { Modal, Input, Button, Icon } from "semantic-ui-react";
+import mime from "mime-types";
 
-function FileModal({ modal, closeModal }) {
+function FileModal({ modal, closeModal, authorizedTypes, uploadFile }) {
+  const [file, setFile] = useState("");
+
+  const addFile = event => {
+    const fileInput = event.target.files[0];
+
+    if (fileInput) {
+      setFile(fileInput);
+    }
+  };
+
+  const sendFile = () => {
+    if (file !== null) {
+      if (isAuthorized(file.name)) {
+        const metadata = { contentType: mime.lookup(file.name) };
+        uploadFile(file, metadata);
+        closeModal();
+        setFile("");
+      }
+    }
+  };
+
+  const isAuthorized = fileName =>
+    authorizedTypes.includes(mime.lookup(fileName));
+
   return (
     <Modal basic open={modal} onClose={closeModal}>
       <Modal.Header> Select an image file</Modal.Header>
       <Modal.Content>
-        <Input fluid label="File types: jpg, png" name="file" type="file" />
+        <Input
+          fluid
+          label="File types: jpg, png"
+          name="file"
+          type="file"
+          onChange={addFile}
+        />
       </Modal.Content>
       <Modal.Actions>
-        <Button color="green" inverted>
+        <Button color="green" inverted onClick={sendFile}>
           <Icon name="checkmark" />
           Send
         </Button>
